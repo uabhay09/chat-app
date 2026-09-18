@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head><title>Chat</title></head>
+<body>
+  <input id="room" placeholder="Room name" />
+  <button onclick="join()">Join</button>
+
+  <ul id="messages"></ul>
+  <input id="input" autocomplete="off" />
+  <button onclick="send()">Send</button>
+
+  <script src="./socket.io.min.js"></script>
+  <script>
+    const socket = io("http://localhost:3001");
+    let currentRoom = '';
+
+    socket.on('chat message', (msg) => {
+      const li = document.createElement('li');
+      li.textContent = msg;
+      document.getElementById('messages').appendChild(li);
+    });
+
+    socket.on('chat history', (history) => {
+    history.forEach((item) => {
+     const li = document.createElement('li');
+     li.textContent = item.msg;
+     document.getElementById('messages').appendChild(li);
+  });
+});
+
+    function join() {
+      currentRoom = document.getElementById('room').value;
+      socket.emit('join room', currentRoom);
+    }
+
+    function send() {
+      const input = document.getElementById('input');
+      socket.emit('chat message', { room: currentRoom, msg: input.value });
+      input.value = '';
+    }
+  </script>
+</body>
+</html>
